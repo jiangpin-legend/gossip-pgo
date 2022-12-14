@@ -5,7 +5,7 @@ import os
 import copy
 
 import numpy as np
-from g2o_tool import G2oTool
+from .g2o_tool import G2oTool
 
 class Separator():
     def __init__(self) -> None:

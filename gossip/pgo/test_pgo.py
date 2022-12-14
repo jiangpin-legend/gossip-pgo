@@ -50,6 +50,8 @@ class PoseGraph3D(object):
       # vertice_vec = vertice.estimate().vector()
       t = np.array([0, 0, 1])
       pose = g2o.Isometry3d(np.identity(3), t)
+      print(dir(pose))
+      print(pose.rotation())
       print(np.identity(3))
       # pose = g2o.SE3Quat(np.identity(3), [1*0.04-1, 0, 0])
       print(value)
@@ -138,13 +140,6 @@ class PoseGraphSe3(PoseGraph3D):
     self.nodes_keys = np.array(self.nodes_keys)
     self.edges_key_pairs = np.array(self.edges_key_pairs)
     self.init_separator()
-
-    def nodes2se3(self,nodes):
-      pass
-    
-    def update_nodes(id,new_nodes):
-      # setEstimateDataImpl
-      pass
 
 if __name__ == "__main__":
   if len(sys.argv) > 1:

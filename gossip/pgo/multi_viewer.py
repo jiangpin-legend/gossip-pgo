@@ -6,7 +6,7 @@ import pangolin as pango
 import numpy as np
 import OpenGL.GL as gl
 
-from multi_robot_tools import MultiRobotTools
+from .multi_robot_tools import MultiRobotTools
 
 class MultiViewer3D(object):
   '''
