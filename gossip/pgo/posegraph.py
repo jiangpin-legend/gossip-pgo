@@ -108,6 +108,7 @@ class PoseGraphSE3(PoseGraph3D):
   def load_file(self, fname):
     print("loading:"+fname)
     self.optimizer.load(fname)
+    self.optimizer.set_verbose(True)
     print("vertices: ", len(self.optimizer.vertices()))
     print("edges: ", len(self.optimizer.edges()))
 

@@ -5,7 +5,7 @@ sys.path.append("..")
 import numpy as np
 
 from .gossip_comm import GossipComm
-from .push_sum_optimization import PushSumOptimizer
+from .push_sum_optimization_pgo import PushSumOptimizer
 from .my_timer import timeit
 from .pgo.posegraph import PoseGraphSE3
 
@@ -94,10 +94,10 @@ class PushSumPgo(PushSumOptimizer):
     def _pose_graph_optimization_step(self, argmin_est):
         """ use g2o optimization api to take a step, and return the new domain point. """
         self.pose_graph.update_separator(argmin_est)
-        separator_nodes_se3 = np.array(self.pose_graph.optimize(1))
+        separator_nodes_se3 = np.array(self.pose_graph.optimize(20))
         separator_nodes_se3 = separator_nodes_se3[:,:,0]
-        print('seperator')
-        print(separator_nodes_se3.shape)
+        # print('seperator')
+        # print(separator_nodes_se3.shape)
         return separator_nodes_se3
 
     def minimize(self):

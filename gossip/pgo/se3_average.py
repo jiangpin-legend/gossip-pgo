@@ -52,8 +52,8 @@ def update_pose(poses,delta_poses):
 
 def se3_average_at(new_poses_list,col_weight_list,local_poses,local_weight):
     delta_poses = np.zeros(local_poses.shape)
-    print('local pose shape')
-    print(delta_poses.shape)
+    # print('local pose shape')
+    # print(delta_poses.shape)
     # print(delta_pose)
     for i in range(new_poses_list.shape[0]):
         new_pose = new_poses_list[i,:]
@@ -69,9 +69,9 @@ def se3_average_at(new_poses_list,col_weight_list,local_poses,local_weight):
         # print(c)
         # print(linearized_poses*col_weight)
         delta_poses += linearized_poses*col_weight
-    print('delta pose')
-    print(delta_poses.shape)
+    # print('delta pose')
+    # print(delta_poses.shape)
     avg_pose = update_pose(local_poses,delta_poses)
-    print('average pose')
-    print(avg_pose.shape)
+    # print('average pose')
+    # print(avg_pose.shape)
     return avg_pose

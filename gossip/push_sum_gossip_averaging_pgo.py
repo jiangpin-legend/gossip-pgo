@@ -139,16 +139,18 @@ class PushSumGossipAveragerPgo(object):
             # print(push_message)
             # print(type(push_message))
             # push_message = []
-            print('-------'+str(peer_uid)+'------')
-            print(ps_n.shape)
+
+            # print('-------'+str(peer_uid)+'------')
+            # print(ps_n.shape)
             # print(ps_w,col_w)
             # push_message = np.append(ps_n,ps_w,consensus_column[i])
             push_message = np.append(ps_n,float(ps_w))
             push_message = np.append(push_message,consensus_column[i])
-            print("message use to push")
-            print(push_message[-1])
-            print(push_message[-2])
-            print(push_message.shape)
+            
+            # print("message use to push")
+            # print('col_w',push_message[-1])
+            # print('ps_w',push_message[-2])
+            # print(push_message.shape)
             # print('finished')
             # print(push_message)
             _ = COMM.Ibsend(push_message, dest=peer_uid)
@@ -220,18 +222,20 @@ class PushSumGossipAveragerPgo(object):
             # @todo in degree or out degree? 
             data = np.empty(self.average.size +2, dtype=np.float64)
             COMM.Recv(data, info.source)
-            print("----recieved data----")
-            print(data.shape)
+            # print("----recieved data----")
+            # print(data.shape)
             
             col_w = data[-1]
             ps_w_in = data[-2]
-            print(col_w,ps_w_in)
+            # print(col_w,ps_w_in)
             ps_n = data[0:-2].reshape([-1,6])
             # Update if received a message
             itr += 1
-            print("curr iter"+str(itr))
+            
+            # print("curr iter"+str(itr))
 
-            ps_w += ps_w_in
+            ps_w += col_w*ps_w_in
+            # print('ps_w',ps_w,'ps_w_in',ps_w_in)
             #default out
             col_w_list.append(col_w)
 

@@ -123,8 +123,8 @@ class PushSumGossipAverager(object):
         :rtype: void
         """
         for i, peer_uid in enumerate(peers):
-            # push_message = np.append(consensus_column[i]*ps_n, consensus_column[i]*ps_w)
-            push_message = np.append(consensus_column[i],ps_n,ps_w)
+            push_message = np.append(consensus_column[i]*ps_n, consensus_column[i]*ps_w)
+            # push_message = np.append(consensus_column[i],ps_n,ps_w)
             _ = COMM.Ibsend(push_message, dest=peer_uid)
 
     def recieve_asynchronously(self):
@@ -304,6 +304,8 @@ class PushSumGossipAverager(object):
 
             ps_w = lo_w + rcvd['ps_w']
             ps_n = lo_n + rcvd['ps_n']
+
+            print('ps_w',ps_w,'lo_w',lo_w,'rcvd_w',rcvd['ps_w'])
 
             # If received at least one message, set external rcvd flag to high
             if rcvd['num_messages'] > 0:

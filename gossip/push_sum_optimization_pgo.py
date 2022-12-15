@@ -11,8 +11,8 @@ import warnings
 import numpy as np
 
 from .gossip_comm import GossipComm
-# from .push_sum_gossip_averaging_pgo import PushSumGossipAveragerPgo as PSGA
-from .push_sum_gossip_averaging import PushSumGossipAverager as PSGA
+from .push_sum_gossip_averaging_pgo import PushSumGossipAveragerPgo as PSGA
+# from .push_sum_gossip_averaging import PushSumGossipAverager as PSGA
 # Message passing and network variables
 SIZE = GossipComm.size
 UID = GossipComm.uid
