@@ -45,6 +45,7 @@ class PoseGraph3D(object):
     self.nodes = np.array([i.estimate().matrix() for i in self.optimizer.vertices().values()])
     self.nodes_keys = [key for key in self.optimizer.vertices().keys()]
 
+    
     for value in self.optimizer.vertices().values():
       # vertice = self.optimizer
       # vertice_vec = vertice.estimate().vector()

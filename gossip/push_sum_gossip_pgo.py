@@ -52,10 +52,12 @@ class PushSumPgo(PushSumOptimizer):
 
         self.pose_graph = PoseGraphSE3(robot_id=UID)
         self.data_dir = data_dir
-        file_name = self.data_dir+'/'+str(UID)+'_renamed.g2o'
+        file_name = self.data_dir+'/'+str(UID)+'_separator.g2o'
         self.pose_graph.load_file(file_name)
         arg_start = self.pose_graph.separator_nodes_se3
-        
+        print('------'+str(UID)+'-------')
+        # print(self.pose_graph.separator_node_key)
+        # print('wait') 
         super(PushSumPgo, self).__init__(objective=objective,
                                             sub_gradient=sub_gradient,
                                             arg_start=arg_start,
@@ -94,7 +96,7 @@ class PushSumPgo(PushSumOptimizer):
     def _pose_graph_optimization_step(self, argmin_est):
         """ use g2o optimization api to take a step, and return the new domain point. """
         self.pose_graph.update_separator(argmin_est)
-        separator_nodes_se3 = np.array(self.pose_graph.optimize(20))
+        separator_nodes_se3 = np.array(self.pose_graph.optimize(1))
         separator_nodes_se3 = separator_nodes_se3[:,:,0]
         # print('seperator')
         # print(separator_nodes_se3.shape)
@@ -167,16 +169,19 @@ class PushSumPgo(PushSumOptimizer):
 
             itr += 1
 
-            # -- START Subgradient-Push update -- #
+            # -- START Subgradient-Push update --
 
+            ps_n = self._pose_graph_optimization_step(argmin_est=argmin_est)
+            print(str(UID)+'_0',ps_n[0:3,:])
+            print(str(UID)+'_-1',ps_n[-4:-1,:])
             # Gossip
-            ps_result = psga.gossip(gossip_value=ps_n, ps_weight=ps_w)
+            ps_result = psga.gossip(gossip_value=ps_n,argmin_est=argmin_est,ps_weight=ps_w)
             ps_n = ps_result['ps_n']
             ps_w = ps_result['ps_w']
 
             # Update argmin estimate and take a step
             argmin_est = ps_result['avg']
-            ps_n = self._pose_graph_optimization_step(argmin_est=argmin_est)
+            
             # ps_n = self._gradient_descent_step(ps_n=ps_n,
             #                                    argmin_est=argmin_est,
             #                                    itr=itr,
@@ -195,7 +200,7 @@ class PushSumPgo(PushSumOptimizer):
                 condition = itr < num_gossip_itr
             else:
                 condition = time.time() < end_time
-
+            time.sleep(1)
         self.argmin_est = argmin_est
 
         if log is True:
@@ -223,7 +228,7 @@ if __name__ == "__main__":
         b_v = np.random.randn(num_instances_per_node, 1)
         objective = lambda x: 0.5 * (np.linalg.norm(a_m.dot(x) - b_v))**2
         gradient = lambda x: a_m.T.dot(a_m.dot(x)-b_v)
-        data_dir = '/home/jiangpin/dataset/example_4robots'
+        data_dir = '/home/jiangpin/dataset/new_4robots'
         pssgd = PushSumPgo(data_dir = data_dir,
                             objective=objective,
                             sub_gradient=gradient,

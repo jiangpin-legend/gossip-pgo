@@ -9,6 +9,7 @@ Push Sum Gossip Averaging class for parallel averaging using column stochastic m
 import random
 import time
 import sys
+import logging
 sys.path.append("..")
 
 import warnings
@@ -18,7 +19,7 @@ import numpy as np
 
 from .gossip_comm import GossipComm
 from .pgo.se3_average import se3_average_at
-
+from .utils.multi_robot_logger import MultiRobotLogger as mrl
 
 # Message passing and network variables
 COMM = GossipComm.comm
@@ -59,7 +60,8 @@ class PushSumGossipAveragerPgo(object):
 
         # Break on all numpy warnings
         np.seterr(all='raise')
-
+        self.robot_id = UID
+        self.logger = mrl(__name__,self.robot_id,logging.DEBUG).logger
         self.average = None
 
         self.synch = synch
@@ -146,10 +148,11 @@ class PushSumGossipAveragerPgo(object):
             # push_message = np.append(ps_n,ps_w,consensus_column[i])
             push_message = np.append(ps_n,float(ps_w))
             push_message = np.append(push_message,consensus_column[i])
-            
+
             # print("message use to push")
             # print('col_w',push_message[-1])
             # print('ps_w',push_message[-2])
+            self.logger.info(push_message.shape)
             # print(push_message.shape)
             # print('finished')
             # print(push_message)
@@ -229,6 +232,9 @@ class PushSumGossipAveragerPgo(object):
             ps_w_in = data[-2]
             # print(col_w,ps_w_in)
             ps_n = data[0:-2].reshape([-1,6])
+            # print(str(UID)+'_0',ps_n[0:3,:])
+            # print(str(UID)+'_-1',ps_n[-4:-1,:])
+
             # Update if received a message
             itr += 1
             
@@ -255,7 +261,7 @@ class PushSumGossipAveragerPgo(object):
         return {'num_messages': itr, 'ps_w': ps_w, 'ps_n': ps_n_list,'col_w':col_w_list}
 
 
-    def gossip(self, gossip_value, ps_weight=1.0, just_probe=False, start_together=False):
+    def gossip(self, gossip_value,argmin_est, ps_weight=1.0, just_probe=False, start_together=False):
         """
         Perform the distribued gossip averaging (settings given by the instance parameters).
 
@@ -341,7 +347,7 @@ class PushSumGossipAveragerPgo(object):
             out_p = column['out_p'] # vector
             lo_p = column['lo_p']   # scalar
             lo_w = ps_w * lo_p
-            # lo_n = ps_n
+            lo_n = ps_n
 
 
             # Conditions for numerical instability prevention
@@ -351,14 +357,14 @@ class PushSumGossipAveragerPgo(object):
                 self.push_messages_to_peers(peers, out_p, ps_w, ps_n)
             else:
                 lo_w = ps_w
-                # lo_n = ps_n
+                lo_n = ps_n
 
             if self.synch is False:
                 rcvd = self.recieve_asynchronously()
             else:
                 rcvd = self.receive_synchronously()
 
-            ps_n = se3_average_at(rcvd['ps_n'],rcvd['col_w'],ps_n,lo_p)
+            ps_n = se3_average_at(rcvd['ps_n'],rcvd['col_w'],lo_n,lo_p,argmin_est)
             ps_w = lo_w + rcvd['ps_w']
             # ps_n = lo_n + rcvd['ps_n']
 

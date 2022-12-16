@@ -78,25 +78,37 @@ class PoseGraph3D(object):
     separator_key = np.array( [key_pair for key_pair in self.edges_key_pairs if (self.multi_robot_tools.key2robot_id_g2o(key_pair[0])!=self.multi_robot_tools.key2robot_id_g2o(key_pair[1])) ] )
 
     self.separator_edge_mask = np.array([ (self.multi_robot_tools.is_separator_g2o(key_pair)) for key_pair in self.edges_key_pairs])
-
+    print(self.separator_edge_mask.shape)
     separator_node_key = []
     for key_pair in separator_key:
       separator_node_key.append(key_pair[0])
       separator_node_key.append(key_pair[1])
     separator_node_key = np.array(separator_node_key)
+    #unique the key and sort
     separator_node_key = np.unique(separator_node_key)
+    print(separator_node_key)
     self.separator_node_key = separator_node_key
 
-    self.separator_node_mask = np.isin(self.nodes_keys,separator_node_key)
+    # self.separator_node_mask = np.isin(self.nodes_keys,separator_node_key)
     # print(separator_node_mask)
+    print(self.edges.shape)
     self.separator_edges = np.array(self.edges[self.separator_edge_mask])
-    self.separator_nodes = np.array(self.nodes[self.separator_node_mask])
+
+    # self.separator_nodes = np.array(self.nodes[self.separator_node_mask])
+    self.separator_nodes = []
     self.separator_nodes_se3 = []
-    for i in range(self.separator_nodes.shape[0]):
-      matrix = self.separator_nodes[i,:,:]
-      se3_node = SE3(matrix).log()
-      self.separator_nodes_se3.append(se3_node)
+
+
+
+    for key in separator_node_key:
+        node_matrix = self.optimizer.vertices()[key].estimate().matrix()
+        self.separator_nodes.append(node_matrix)
+        se3_node = SE3(node_matrix).log()
+        self.separator_nodes_se3.append(se3_node)
+
     self.separator_nodes_se3 = np.array(self.separator_nodes_se3)[:,:,0]
+    self.separator_nodes = np.array(self.separator_nodes)
+    print(self.separator_nodes.shape)
     print(self.separator_nodes_se3.shape)
 
 
@@ -238,11 +250,11 @@ if __name__ == "__main__":
     
 
 
-  graph = PoseGraph3D()
+  graph = PoseGraphSE3()
   graph.load_file(gfile)
   #graph.optimize()
   print("loaded")
-  viewer = MultiViewer3D(graph,4)
+  # viewer = MultiViewer3D(graph,4)
 
   # graph.optimize()
   # viewer = Viewer3D(graph)
